@@ -1,0 +1,9 @@
+# Root .gitignore
+node_modules/
+**/node_modules/
+.env
+**/.env
+.DS_Store
+*.log
+uploads/*
+!uploads/.gitkeep

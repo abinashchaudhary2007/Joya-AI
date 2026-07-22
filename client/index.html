@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Joya AI — A premium AI chatbot powered by advanced language models. Ask anything, upload documents, and get intelligent answers instantly.">
+    <meta name="theme-color" content="#0f0f1a">
+
+    <title>Joya AI — Intelligent Chatbot</title>
+    <link rel="icon" href="logo.png" type="image/png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Markdown parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app" id="app">
+
+        <!-- ═══════════════ SIDEBAR ═══════════════ -->
+        <aside class="sidebar" id="sidebar">
+
+            <!-- Logo -->
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="logo.png" alt="Joya AI Logo" class="logo-img">
+                    <span class="logo-text">Joya <span class="logo-ai">AI</span></span>
+                </div>
+                <button class="icon-btn" id="closeSidebar" title="Close sidebar" aria-label="Close sidebar">✕</button>
+            </div>
+
+            <!-- New chat -->
+            <button class="new-chat-btn" id="newChat" aria-label="Start new chat">
+                <span class="btn-icon">+</span>
+                <span>New Chat</span>
+            </button>
+
+            <!-- Session history -->
+            <div class="history-section">
+                <div class="history-label">Recent Chats</div>
+                <div class="history" id="history" role="list" aria-label="Chat history"></div>
+            </div>
+
+            <!-- Sidebar footer -->
+            <div class="sidebar-footer">
+                <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle dark/light mode">
+                    <span class="theme-icon" id="themeIcon">🌙</span>
+                    <span id="themeLabel">Dark mode</span>
+                </button>
+            </div>
+
+        </aside>
+
+        <!-- ═══════════════ MAIN CHAT ═══════════════ -->
+        <main class="chat" id="chat">
+
+            <!-- Top Header -->
+            <header class="chat-header" role="banner">
+                <button class="icon-btn menu-btn" id="openSidebar" title="Open sidebar" aria-label="Open sidebar">☰</button>
+
+                <div class="header-center">
+                    <div class="model-badge">
+                        <span class="model-dot"></span>
+                        <span id="modelName">Joya AI</span>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <button class="icon-btn" id="voiceToggle" title="Auto-read responses (Voice)" aria-label="Toggle auto voice output">🔊</button>
+                    <button class="icon-btn" id="uploadToggle" title="Upload document" aria-label="Upload document">📎</button>
+                    <button class="icon-btn" id="clearChat" title="Clear chat" aria-label="Clear chat">🗑️</button>
+                </div>
+            </header>
+
+            <!-- Upload Panel (hidden by default) -->
+            <div class="upload-panel" id="uploadPanel" role="region" aria-label="Document upload" hidden>
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📄</div>
+                    <p class="upload-title">Drop a PDF here</p>
+                    <p class="upload-sub">or click to browse</p>
+                    <input type="file" id="fileInput" accept=".pdf,.txt" hidden aria-label="Select file">
+                </div>
+                <div class="upload-status" id="uploadStatus" hidden></div>
+            </div>
+
+            <!-- Messages -->
+            <div class="messages" id="messages" role="log" aria-live="polite" aria-label="Chat messages">
+
+                <!-- Welcome screen -->
+                <div class="welcome" id="welcome">
+                    <img src="logo.png" alt="Joya AI Logo" class="welcome-logo-img">
+                    <h1 class="welcome-title">Hello, I'm <span class="gradient-text">Joya</span></h1>
+                    <p class="welcome-sub">Your intelligent AI assistant. Ask me anything — I'm here to help.</p>
+                    <div class="suggestion-chips" role="list" aria-label="Suggested prompts">
+                        <button class="chip" role="listitem">✍️ Write me a short story</button>
+                        <button class="chip" role="listitem">🧪 Explain quantum computing</button>
+                        <button class="chip" role="listitem">💻 Write Python code for sorting</button>
+                        <button class="chip" role="listitem">🌍 Best places to travel in 2025</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Typing indicator (outside messages, always rendered) -->
+            <div class="typing-indicator" id="typingIndicator" hidden aria-label="Joya is typing">
+                <div class="typing-avatar">✦</div>
+                <div class="typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <span class="typing-text">Joya is thinking…</span>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area" role="form" aria-label="Message input">
+                <div class="input-wrapper">
+                    <textarea
+                        id="prompt"
+                        placeholder="Message Joya…"
+                        rows="1"
+                        maxlength="4000"
+                        aria-label="Type your message"
+                        aria-multiline="true"></textarea>
+                    <div class="input-footer">
+                        <span class="char-count" id="charCount">0 / 4000</span>
+                        <div class="input-actions">
+                            <span class="hint-text">Shift+Enter for newline</span>
+                            <button class="icon-btn mic-btn" id="micBtn" title="Voice Input (Speak)" aria-label="Start voice input">🎙️</button>
+                            <button class="send-btn" id="sendBtn" aria-label="Send message" title="Send (Enter)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
