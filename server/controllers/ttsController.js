@@ -9,11 +9,15 @@ const ttsController = async (req, res) => {
     const voiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL"; // Default Bella (Female)
 
     if (!apiKey) {
+      console.error("TTS: ELEVENLABS_API_KEY is not set in environment variables");
       return res.status(500).json({
         success: false,
         error: "ElevenLabs API Key is not configured on the server."
       });
     }
+
+    // Truncate very long text to avoid ElevenLabs timeouts (max ~5000 chars)
+    const truncatedText = text.length > 5000 ? text.slice(0, 5000) + "..." : text;
 
     // Call ElevenLabs API
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
@@ -24,7 +28,7 @@ const ttsController = async (req, res) => {
         "accept": "audio/mpeg"
       },
       body: JSON.stringify({
-        text: text,
+        text: truncatedText,
         model_id: "eleven_multilingual_v2",
         voice_settings: {
           stability: 0.5,
@@ -35,20 +39,23 @@ const ttsController = async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("ElevenLabs TTS error:", errText);
+      console.error("ElevenLabs TTS error:", response.status, errText);
       return res.status(response.status).json({
         success: false,
-        error: `ElevenLabs TTS failed: ${errText}`
+        error: `ElevenLabs TTS failed (${response.status}): ${errText}`
       });
     }
 
     // Return the audio buffer to the client
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
     res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Length", buffer.length);
+    res.setHeader("Cache-Control", "no-cache");
     res.send(buffer);
   } catch (error) {
-    console.error("TTS Controller exception:", error);
+    console.error("TTS Controller exception:", error.message || error);
     res.status(500).json({
       success: false,
       error: error.message || "Failed to generate text-to-speech"
