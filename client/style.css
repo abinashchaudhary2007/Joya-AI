@@ -655,6 +655,7 @@ body {
     height: 100%;
     object-fit: cover;
     display: block;
+    transform: scale(1.35); /* Zoom in to remove padding */
 }
 
 .message-content {
