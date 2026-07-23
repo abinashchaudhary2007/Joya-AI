@@ -591,14 +591,24 @@ const getJoyaFemaleVoice = () => {
 };
 
 // ── Avatar Animation Helpers ──────────────────────────
-const startAvatarAnimation = () => {
+const startAvatarAnimation = (btn = null) => {
     const welcomeLogo = document.querySelector('.welcome-logo-img');
     if (welcomeLogo) welcomeLogo.classList.add('speaking-anim');
+
+    if (btn) {
+        const group = btn.closest('.message-group');
+        const avatar = group?.querySelector('.message-avatar');
+        if (avatar) avatar.classList.add('speaking-anim');
+    }
 };
 
 const stopAvatarAnimation = () => {
     const welcomeLogo = document.querySelector('.welcome-logo-img');
     if (welcomeLogo) welcomeLogo.classList.remove('speaking-anim');
+
+    document.querySelectorAll('.message-avatar.speaking-anim').forEach(el => {
+        el.classList.remove('speaking-anim');
+    });
 };
 
 const speakText = async (rawText, btn = null) => {
@@ -653,7 +663,7 @@ const speakText = async (rawText, btn = null) => {
         currentAudio = audio;
 
         audio.onplay = () => {
-            startAvatarAnimation();
+            startAvatarAnimation(btn);
         };
 
         audio.onended = () => {
