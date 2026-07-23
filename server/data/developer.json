@@ -1,0 +1,48 @@
+{
+  "name": "Abinash Chaudhary",
+  "role": "Full Stack Developer & AI Enthusiast",
+  "country": "Nepal",
+  "bio": "Abinash Chaudhary is a passionate full stack developer from Nepal who loves building intelligent applications. He created Joya AI as a personal project to explore the possibilities of conversational AI, combining his love for clean code and meaningful user experiences.",
+  "skills": [
+    "Full Stack Web Development",
+    "AI & Machine Learning integration",
+    "REST API Design",
+    "Database Design",
+    "UI/UX Design",
+    "Problem Solving"
+  ],
+  "technologies": [
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Node.js",
+    "Express",
+    "Supabase",
+    "PostgreSQL",
+    "HTML & CSS",
+    "Groq API",
+    "Vercel"
+  ],
+  "projects": [
+    {
+      "name": "Joya AI",
+      "description": "An intelligent conversational AI assistant with memory, PDF upload, voice, and multi-session chat support. Built with Node.js, Express, Groq API, and Supabase.",
+      "url": "https://joya-ai-abhi.vercel.app"
+    },
+    {
+      "name": "Brew Haven",
+      "description": "A full-featured cafe web application with table reservations, dine-in ordering, cart management, and an admin dashboard. Built with React, TypeScript, and Supabase.",
+      "url": "https://brew-haven-livid.vercel.app"
+    }
+  ],
+  "interests": [
+    "Artificial Intelligence",
+    "Open Source development",
+    "Building useful tools for people",
+    "Learning new technologies",
+    "Anime"
+  ],
+  "contact": {
+    "github": "https://github.com/abinashchaudhary2007"
+  }
+}

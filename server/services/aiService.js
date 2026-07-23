@@ -2,7 +2,12 @@ import aiConfig from "../config/aiConfig.js";
 
 const DEFAULT_REPLY = "I'm sorry, I couldn't generate a response. Please try again.";
 
-const SYSTEM_PROMPT = `You are Joya, a brilliant and friendly AI assistant. You are helpful, concise, and clear. 
+const SYSTEM_PROMPT = `You are Joya AI, an AI assistant created by Abinash Chaudhary.
+
+If the user asks about your creator or developer, answer only using the provided developer profile.
+For all other questions, respond normally.
+Never invent information about your creator. If a detail is unavailable, politely say you don't have that information.
+
 When answering:
 - Use Markdown formatting where appropriate (bold for key terms, code blocks for code, bullet lists for steps).
 - Keep answers focused and accurate.
@@ -21,15 +26,19 @@ const buildGroqResponse = (data) => {
 /**
  * Call Groq with a full messages array (supports conversation history).
  * @param {Array<{role: string, content: string}>} messages
+ * @param {string} [customSystemPrompt] - Optional override for the system prompt
  */
-const callGroq = async (messages) => {
+const callGroq = async (messages, customSystemPrompt) => {
   const url = "https://api.groq.com/openai/v1/chat/completions";
+
+  // Use custom prompt if provided (e.g. for developer questions), else use default
+  const activePrompt = customSystemPrompt || SYSTEM_PROMPT;
 
   // Prepend system prompt if not already present
   const fullMessages =
     messages[0]?.role === "system"
       ? messages
-      : [{ role: "system", content: SYSTEM_PROMPT }, ...messages];
+      : [{ role: "system", content: activePrompt }, ...messages];
 
   const body = {
     model: aiConfig.groqModel,
@@ -117,8 +126,9 @@ const callOpenAI = async (messages) => {
 /**
  * Main entry — accepts either a messages array or falls back to a single message string.
  * @param {string|Array} messageOrHistory
+ * @param {string} [customSystemPrompt] - Optional override for the system prompt
  */
-export const getBotReply = async (messageOrHistory) => {
+export const getBotReply = async (messageOrHistory, customSystemPrompt) => {
   // Normalize to messages array
   const messages = Array.isArray(messageOrHistory)
     ? messageOrHistory
@@ -126,7 +136,7 @@ export const getBotReply = async (messageOrHistory) => {
 
   try {
     if (aiConfig.groqKey) {
-      return await callGroq(messages);
+      return await callGroq(messages, customSystemPrompt);
     }
     if (aiConfig.openAIKey) {
       return await callOpenAI(messages);
