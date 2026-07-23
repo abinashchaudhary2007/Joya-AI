@@ -734,11 +734,13 @@ const playJoyaWelcomeSpeech = async () => {
         audio.onerror = () => {
             stopAvatarAnimation();
             if (currentAudio === audio) currentAudio = null;
+            welcomeSpoken = false;
         };
 
         await audio.play();
     } catch (err) {
         console.error("Automatic welcome greeting failed to play:", err);
+        welcomeSpoken = false;
     }
 };
 

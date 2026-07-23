@@ -9,10 +9,11 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import errorHandler from "./middleware/errorMiddleware.js";
 import { requestLogger } from "./utils/logger.js";
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+
 const clientPath = path.resolve(__dirname, "../client");
 
 const app = express();
