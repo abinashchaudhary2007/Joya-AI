@@ -1,8 +1,8 @@
 import fs from "fs/promises";
 import pdfParse from "pdf-parse";
 
-export const parsePdfText = async (filePath) => {
-  const fileBuffer = await fs.readFile(filePath);
+export const parsePdfText = async (fileInput) => {
+  const fileBuffer = Buffer.isBuffer(fileInput) ? fileInput : await fs.readFile(fileInput);
   const data = await pdfParse(fileBuffer);
   return data.text || "";
 };

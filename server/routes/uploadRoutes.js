@@ -9,16 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadDir = path.join(__dirname, "../uploads");
 
-const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, uploadDir);
-  },
-  filename: (req, file, callback) => {
-    const extension = path.extname(file.originalname);
-    const safeName = `${uuidv4()}${extension}`;
-    callback(null, safeName);
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, callback) => {
   if (file.mimetype !== "application/pdf") {

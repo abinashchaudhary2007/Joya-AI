@@ -11,7 +11,7 @@ const uploadController = async (req, res, next) => {
     }
 
     const title = req.body.title || file.originalname;
-    const insertedCount = await ingestPdf({ filePath: file.path, title });
+    const insertedCount = await ingestPdf({ filePath: file.buffer || file.path, title });
 
     return res.status(201).json({
       success: true,
