@@ -9,7 +9,7 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import errorHandler from "./middleware/errorMiddleware.js";
 import { requestLogger } from "./utils/logger.js";
 
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), "server/.env") });
 
 const clientPath = path.resolve(process.cwd(), "client");
 
