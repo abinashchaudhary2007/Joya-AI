@@ -107,8 +107,12 @@ themeToggle.addEventListener('click', () => {
 applyTheme(localStorage.getItem('joya_theme') || localStorage.getItem('nova_theme') || 'dark');
 
 // ── Mobile Sidebar Toggle ─────────────────────────────
+const sidebarBackdropEl = document.getElementById('sidebarBackdrop');
 openSidebar.addEventListener('click', () => sidebar.classList.add('mobile-open'));
 closeSidebar.addEventListener('click', () => sidebar.classList.remove('mobile-open'));
+if (sidebarBackdropEl) {
+    sidebarBackdropEl.addEventListener('click', () => sidebar.classList.remove('mobile-open'));
+}
 
 // ── Character Counter ─────────────────────────────────
 promptInput.addEventListener('input', () => {
