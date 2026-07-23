@@ -510,6 +510,8 @@ window.copyCode = (btn, code) => {
 let isAutoVoiceEnabled = localStorage.getItem('joya_auto_voice') === 'true';
 let currentSpeechUtterance = null;
 let activeSpeakBtn = null;
+let welcomeSpoken = false;
+let currentAudio = null;
 
 if (isAutoVoiceEnabled && voiceToggle) {
     voiceToggle.classList.add('active');
@@ -591,27 +593,19 @@ const getJoyaFemaleVoice = () => {
 // ── Avatar Animation Helpers ──────────────────────────
 const startAvatarAnimation = () => {
     const welcomeLogo = document.querySelector('.welcome-logo-img');
-    const sidebarLogo = document.querySelector('.logo-img');
     if (welcomeLogo) welcomeLogo.classList.add('speaking-anim');
-    if (sidebarLogo) sidebarLogo.classList.add('speaking-anim');
 };
 
 const stopAvatarAnimation = () => {
     const welcomeLogo = document.querySelector('.welcome-logo-img');
-    const sidebarLogo = document.querySelector('.logo-img');
     if (welcomeLogo) welcomeLogo.classList.remove('speaking-anim');
-    if (sidebarLogo) sidebarLogo.classList.remove('speaking-anim');
 };
 
-const speakText = (rawText, btn = null) => {
-    if (!('speechSynthesis' in window)) {
-        alert('Text-to-speech is not supported in this browser.');
-        return;
-    }
-
+const speakText = async (rawText, btn = null) => {
     // Stop current speech if playing
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
         stopAvatarAnimation();
         if (activeSpeakBtn) {
             activeSpeakBtn.innerHTML = '🔊 Speak';
@@ -626,85 +620,124 @@ const speakText = (rawText, btn = null) => {
     const cleanText = stripMarkdownForSpeech(rawText);
     if (!cleanText) return;
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 0.95;
-    utterance.pitch = 1.35; // Distinct, sweet female voice pitch
-
-    const femaleVoice = getJoyaFemaleVoice();
-    if (femaleVoice) utterance.voice = femaleVoice;
-
     if (btn) {
         activeSpeakBtn = btn;
-        btn.innerHTML = '⏹️ Stop';
+        btn.innerHTML = '⏳ Loading...';
         btn.classList.add('speaking');
     }
 
-    utterance.onstart = () => {
-        startAvatarAnimation();
-    };
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/chat/tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: cleanText })
+        });
 
-    utterance.onend = () => {
+        if (!res.ok) {
+            throw new Error(`TTS server error (${res.status})`);
+        }
+
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+
+        if (btn) {
+            btn.innerHTML = '⏹️ Stop';
+        }
+
+        const audio = new Audio(audioUrl);
+        currentAudio = audio;
+
+        audio.onplay = () => {
+            startAvatarAnimation();
+        };
+
+        audio.onended = () => {
+            stopAvatarAnimation();
+            if (btn) {
+                btn.innerHTML = '🔊 Speak';
+                btn.classList.remove('speaking');
+            }
+            if (activeSpeakBtn === btn) activeSpeakBtn = null;
+            if (currentAudio === audio) currentAudio = null;
+        };
+
+        audio.onerror = (e) => {
+            console.error("Audio playback error:", e);
+            stopAvatarAnimation();
+            if (btn) {
+                btn.innerHTML = '🔊 Speak';
+                btn.classList.remove('speaking');
+            }
+            if (activeSpeakBtn === btn) activeSpeakBtn = null;
+            if (currentAudio === audio) currentAudio = null;
+        };
+
+        await audio.play();
+    } catch (err) {
+        console.error("ElevenLabs TTS error:", err);
         stopAvatarAnimation();
         if (btn) {
             btn.innerHTML = '🔊 Speak';
             btn.classList.remove('speaking');
         }
-        activeSpeakBtn = null;
-    };
-
-    utterance.onerror = () => {
-        stopAvatarAnimation();
-        if (btn) {
-            btn.innerHTML = '🔊 Speak';
-            btn.classList.remove('speaking');
-        }
-        activeSpeakBtn = null;
-    };
-
-    currentSpeechUtterance = utterance;
-    window.speechSynthesis.speak(utterance);
+        if (activeSpeakBtn === btn) activeSpeakBtn = null;
+        alert(`Failed to play voice: ${err.message || 'Server error'}`);
+    }
 };
 
-const playJoyaWelcomeSpeech = () => {
-    if (welcomeSpoken || !('speechSynthesis' in window)) return;
+const playJoyaWelcomeSpeech = async () => {
+    if (welcomeSpoken) return;
     welcomeSpoken = true;
 
-    const welcomeMsg = "Hello! Welcome to Joya AI. I'm Joya, your personal assistant. How can I help you today?";
-    const utterance = new SpeechSynthesisUtterance(welcomeMsg);
-    utterance.rate = 0.95;
-    utterance.pitch = 1.25;
-
-    const voice = getJoyaFemaleVoice();
-    if (voice) {
-        utterance.voice = voice;
-        console.log("Joya Female Voice selected:", voice.name, voice.lang);
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        stopAvatarAnimation();
+        if (activeSpeakBtn) {
+            activeSpeakBtn.innerHTML = '🔊 Speak';
+            activeSpeakBtn.classList.remove('speaking');
+            activeSpeakBtn = null;
+        }
     }
 
-    utterance.onstart = () => {
-        startAvatarAnimation();
-    };
+    const welcomeMsg = "Hello! Welcome to Joya AI. I'm Joya, your personal assistant. How can I help you today?";
 
-    utterance.onend = () => {
-        stopAvatarAnimation();
-    };
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/chat/tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: welcomeMsg })
+        });
 
-    utterance.onerror = () => {
-        stopAvatarAnimation();
-    };
+        if (!res.ok) throw new Error("Welcome speech request failed");
 
-    window.speechSynthesis.speak(utterance);
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+
+        const audio = new Audio(audioUrl);
+        currentAudio = audio;
+
+        audio.onplay = () => {
+            startAvatarAnimation();
+        };
+
+        audio.onended = () => {
+            stopAvatarAnimation();
+            if (currentAudio === audio) currentAudio = null;
+        };
+
+        audio.onerror = () => {
+            stopAvatarAnimation();
+            if (currentAudio === audio) currentAudio = null;
+        };
+
+        await audio.play();
+    } catch (err) {
+        console.error("Automatic welcome greeting failed to play:", err);
+    }
 };
 
 const setupJoyaVoiceWelcome = () => {
-    if (!('speechSynthesis' in window)) return;
-
-    // Load voices if async
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = () => {
-            if (!welcomeSpoken) playJoyaWelcomeSpeech();
-        };
-    }
-    
     // Attempt automatic welcome greeting
     playJoyaWelcomeSpeech();
 
