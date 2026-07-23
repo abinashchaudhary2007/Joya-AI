@@ -11,9 +11,7 @@ import { requestLogger } from "./utils/logger.js";
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const clientPath = path.resolve(__dirname, "../client");
+const clientPath = path.resolve(process.cwd(), "client");
 
 const app = express();
 
