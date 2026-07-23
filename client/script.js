@@ -136,7 +136,7 @@ const addMessage = (text, sender, animate = true) => {
     if (!animate) group.style.animation = 'none';
 
     const isUser = sender === 'user';
-    const avatarChar = isUser ? '👤' : '✦';
+    const avatarChar = isUser ? '👤' : '<img src="chat-avatar.png" class="chat-avatar-img" alt="Joya">';
     const senderName = isUser ? 'You' : 'Joya';
 
     // Render Markdown for bot messages, escape HTML for user
@@ -255,7 +255,7 @@ const typewriterMessage = (fullText) => {
     group.className = 'message-group bot';
 
     group.innerHTML = `
-        <div class="message-avatar">✦</div>
+        <div class="message-avatar"><img src="chat-avatar.png" class="chat-avatar-img" alt="Joya"></div>
         <div class="message-content">
             <div class="message-meta">
                 <span class="sender-name">Joya</span>

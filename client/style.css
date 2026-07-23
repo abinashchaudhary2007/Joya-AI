@@ -647,6 +647,14 @@ body {
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     color: var(--accent-2);
+    overflow: hidden;
+}
+
+.chat-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .message-content {
@@ -908,6 +916,7 @@ body {
     font-size: 15px;
     color: var(--accent-2);
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .typing-dots {
