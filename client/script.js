@@ -634,7 +634,12 @@ const speakText = async (rawText, btn = null) => {
         });
 
         if (!res.ok) {
-            throw new Error(`TTS server error (${res.status})`);
+            let errMsg = `TTS server error (${res.status})`;
+            try {
+                const errData = await res.json();
+                if (errData.error) errMsg = errData.error;
+            } catch (_) {}
+            throw new Error(errMsg);
         }
 
         const blob = await res.blob();

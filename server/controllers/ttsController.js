@@ -19,6 +19,8 @@ const ttsController = async (req, res) => {
     // Truncate very long text to avoid ElevenLabs timeouts (max ~5000 chars)
     const truncatedText = text.length > 5000 ? text.slice(0, 5000) + "..." : text;
 
+    console.log("TTS: Using voice ID:", voiceId);
+
     // Call ElevenLabs API
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: "POST",
@@ -39,8 +41,8 @@ const ttsController = async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("ElevenLabs TTS error:", response.status, errText);
-      return res.status(response.status).json({
+      console.error("ElevenLabs TTS error:", response.status, "Voice ID:", voiceId, errText);
+      return res.status(502).json({
         success: false,
         error: `ElevenLabs TTS failed (${response.status}): ${errText}`
       });
